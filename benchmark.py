@@ -31,13 +31,16 @@ if "tl" in cfg.models:
 if "cnn" in cfg.models:
     import numpy as np, tensorflow as tf, matplotlib.pyplot as plt
     model, hist, t = custom_cnn.train(cfg.data, CLASSES)
+
     # learning curve
     plt.figure(); plt.plot(hist['accuracy']); plt.plot(hist['val_accuracy'])
     plt.legend(['train','val']); plt.tight_layout()
     plt.savefig(f"{cfg.out}/cnn_learning_curve.png"); plt.close()
+
     # infer
     idx_pred=[ custom_cnn.predict(model,[p])[0] for p in p_te ]
     y_pred=[ CLASSES[i] for i in idx_pred ]
+
     from sklearn.metrics import classification_report
     rpt = classification_report(y_te, y_pred, output_dict=True,zero_division=0)
     from data_utils import save_confusion

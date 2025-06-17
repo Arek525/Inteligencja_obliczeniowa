@@ -14,9 +14,39 @@ def load_paths_labels(root):
     return np.array(paths), np.array(labels)
 
 def hsv_hist(path):
-    img = cv2.imread(path); img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img = cv2.imread(path)
+    # zwraca tablicę NumPy o kształcie (H, W, 3) i typie uint8, gdzie 3 to kanały w przestrzeni BGR (Blue, Green, Red).
+
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # przekształca każdy piksel z BGR na HSV: H (Hue) – odcień (0–180 w OpenCV), S (Saturation) – nasycenie (0–255), V (Value) – jasność (0–255).
+    # Teraz img ma kształt (H, W, 3), ale kanały to [H, S, V].
+
+
     hist = np.concatenate([cv2.calcHist([c],[0],None,[32],[0,256]).flatten()
                            for c in cv2.split(img)])
+    # [c] – lista obrazów (tu pojedynczy kanał),
+    #
+    # [0] – indeks kanału w tej liście (zawsze 0, bo lista ma jeden element),
+    #
+    # None – brak maski (używamy całego obrazu),
+    #
+    # [32] – liczba koszyków (bins) histogramu,
+    #
+    # [0,256] – zakres wartości pikseli, tu od 0 do 255.
+    #
+    # W efekcie dostajesz tablicę (32,1), gdzie każda komórka to liczba pikseli z danego przedziału wartości (np. ile pikseli ma odcień H między 0–7, 8–15, …).
+
+
+    # cv2.split(img) zwraca listę trzech tablic 2D:
+    # c = img[:,:,0] → kanał H,
+    # c = img[:,:,1] → kanał S,
+    # c = img[:,:,2] → kanał V.
+    # Każda taka tablica ma kształt (H, W) i wartości od 0 do 180 lub 255.
+
+    # np.concatenate skleja trzy 32‐elementowe wektory w jedno 96‐elementowe [H_hist|S_hist|V_hist].
+
+
+
     return hist / (hist.sum()+1e-6)
 
 def save_confusion(y_true, y_pred, classes, fname, title=None):
